@@ -80,9 +80,27 @@ const sendMotwRecapMessage = async (currentFeatured, motwEntries) => {
     }
 };
 
+// Maps that can be finished in under 3 seconds are broken/joke maps, they make
+// for a terrible Map of the Week so they never get picked.
+const MIN_MOTW_WR_MS = 3000;
+
+// A map needs at least one entry, and its fastest time has to be slow enough.
+const PLAYABLE_MATCH = {
+    $expr: {
+        $and: [
+            { $gt: [{ $size: { $ifNull: ['$entries', []] } }, 0] },
+            { $gte: [{ $min: '$entries.time' }, MIN_MOTW_WR_MS] }
+        ]
+    }
+};
+
 const sampleRandomLeaderboard = async (excludedMapKey = null) => {
-    const excludeSteam = excludedMapKey ? { steamID: { $ne: excludedMapKey } } : {};
-    const excludeCustom = excludedMapKey ? { id: { $ne: excludedMapKey } } : {};
+    const excludeSteam = excludedMapKey
+        ? { ...PLAYABLE_MATCH, steamID: { $ne: excludedMapKey } }
+        : { ...PLAYABLE_MATCH };
+    const excludeCustom = excludedMapKey
+        ? { ...PLAYABLE_MATCH, id: { $ne: excludedMapKey } }
+        : { ...PLAYABLE_MATCH };
 
     const [steamCount, customCount] = await Promise.all([
         Leaderboard.countDocuments(excludeSteam),
