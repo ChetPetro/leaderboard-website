@@ -7,6 +7,7 @@ const {
     recomputeMapPointsForLeaderboard
 } = require('./shared');
 const { resolveLeaderboardByKey, getMapKey, withMapKey } = require('./mapUtils');
+const { rotateFeaturedLeaderboard } = require('../../utils/motwRotation');
 
 const deleteEntryByMapAndDiscord = async (req, res) => {
     try {
@@ -192,10 +193,36 @@ const recomputeMapPointsAdmin = async (req, res) => {
     }
 };
 
+// Reroll the Map of the Week, e.g. when an unplayable map got picked.
+// Unlike the weekly cron rotation this does NOT award participations or send a
+// recap, so nobody's MotW streak is affected. Submissions for the rejected map
+// are still cleared and the new MotW announcement is still sent.
+const rerollFeaturedLeaderboard = async (req, res) => {
+    try {
+        const { selectedMap, mapKey, previousMap } = await rotateFeaturedLeaderboard({
+            awardParticipations: false
+        });
+        if (!selectedMap) {
+            return res.status(404).json({ error: 'No leadearboard found' });
+        }
+
+        return res.status(200).json({
+            success: true,
+            mapName: selectedMap.mapName,
+            mapKey,
+            previousMapName: previousMap?.mapName ?? null,
+            previousMapKey: previousMap ? getMapKey(previousMap) : null
+        });
+    } catch (err) {
+        return res.status(400).json({ error: err.message });
+    }
+};
+
 module.exports = {
     deleteEntryByMapAndDiscord,
     deleteMotwEntryByMapAndDiscord,
     deleteLeaderboardBySteamID,
     logMapPointsForLeaderboard,
-    recomputeMapPointsAdmin
+    recomputeMapPointsAdmin,
+    rerollFeaturedLeaderboard
 };

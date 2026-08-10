@@ -1,5 +1,5 @@
 const express = require('express');
-const { deleteEntryByMapAndDiscord, deleteMotwEntryByMapAndDiscord, deleteLeaderboardBySteamID, logMapPointsForLeaderboard, recomputeMapPointsAdmin } = require('../controllers/leaderboard/adminController');
+const { deleteEntryByMapAndDiscord, deleteMotwEntryByMapAndDiscord, deleteLeaderboardBySteamID, logMapPointsForLeaderboard, recomputeMapPointsAdmin, rerollFeaturedLeaderboard } = require('../controllers/leaderboard/adminController');
 const requireAuth = require('../middleware/requireAuth');
 const requireAdmin = require('../middleware/requireAdmin');
 
@@ -17,5 +17,6 @@ router.delete('/leaderboards/:mapKey/motw/entries/:discordID', deleteMotwEntryBy
 router.delete('/leaderboards/:mapKey', deleteLeaderboardBySteamID);
 router.get('/leaderboards/:mapKey/map-points', logMapPointsForLeaderboard);
 router.post('/leaderboards/:mapKey/recompute-map-points', recomputeMapPointsAdmin);
+router.post('/motw/reroll', rerollFeaturedLeaderboard);
 
 module.exports = router;

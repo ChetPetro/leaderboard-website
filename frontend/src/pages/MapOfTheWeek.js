@@ -92,6 +92,19 @@ const MapOfTheWeek = ({ user }) => {
         }
     };
 
+    const handleRerollMotw = async () => {
+        if (!user?.token) return;
+        const confirmed = window.confirm(`Are you sure you want to reroll the Map of the Week?\nSubmissions for ${map?.mapName || 'this map'} will be cleared, but nobody's streak is affected.`);
+        if (!confirmed) return;
+
+        try {
+            await api.admin.rerollMotw(user.token);
+            await fetchMap();
+        } catch (error) {
+            // Errors are already shown by the API layer.
+        }
+    };
+
     return (
         <div className="map-details map-of-the-week">
             <div className="inside">
@@ -174,6 +187,20 @@ const MapOfTheWeek = ({ user }) => {
                     </div>
                 </div>
                 <div className="col-right">
+                    { isAdminAuthorized &&
+                        <div className="admin-panel card">
+                            <h2> Admin Panel </h2>
+                            <div className="admin-card-cnt">
+                                <div className="buttons-cnt">
+                                    <div className="buttons">
+                                        <button className="btn btn-red btn-small" onClick={handleRerollMotw} title="Picks a new Map of the Week without awarding participations">
+                                            Reroll MotW
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                     <div className="submit-entry card">
                         {user.userName && (
                             <CreateEntryForm

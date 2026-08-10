@@ -49,4 +49,12 @@ export class AdminApi {
       errorMessage: 'Failed to recompute map points.'
     });
   }
+
+  rerollMotw(token) {
+    return this.httpClient.request('/admin/motw/reroll', {
+      method: 'POST',
+      token,
+      errorMessage: 'Failed to reroll Map of the Week.'
+    });
+  }
 }
